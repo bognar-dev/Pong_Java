@@ -49,6 +49,31 @@ public class TicPanel extends JPanel {
         return false;
     }
 
+    boolean removeAllItems(){
+        objectList.removeAll(objectList);
+        this.repaint();
+        return objectList.isEmpty();
+    }
+
+    boolean hasPosition(Position pos){
+        for (GameObject obj: objectList){
+            if(obj.getPos() == pos){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean add(GameObject gameObject){
+        for (GameObject obj: objectList){
+            if(gameObject.getPos() == obj.getPos()){
+                return false;
+            }
+        }
+        objectList.add(gameObject);
+        return true;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
