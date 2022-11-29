@@ -57,21 +57,31 @@ public class TicPanel extends JPanel {
 
     boolean hasPosition(Position pos){
         for (GameObject obj: objectList){
-            if(obj.getPos() == pos){
-                return false;
+            if(pos.equals(obj.getPos())){
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     public boolean add(GameObject gameObject){
         for (GameObject obj: objectList){
-            if(gameObject.getPos() == obj.getPos()){
+            if(gameObject.getPos().equals(obj.getPos())){
                 return false;
             }
         }
         objectList.add(gameObject);
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        for (GameObject obj:
+             objectList) {
+            str.append(obj.toString());
+        }
+        return str.toString();
     }
 
     @Override
