@@ -59,5 +59,4 @@ public abstract class AbstractMoveableGameObject extends AbstractGameObject impl
 		//		verwende hinzugef�gte Methode scaleY von Positionable
 		this.deltaPos.scaleY(-1);
 	}
-
 }

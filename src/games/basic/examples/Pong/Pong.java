@@ -1,27 +1,29 @@
 package src.games.basic.examples.Pong;
 
+import src.games.basic.gameObjects.moveable.Ball;
 import src.games.basic.position.Position;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class Pong extends JFrame {
+import static java.lang.Thread.sleep;
+
+
+public class Pong extends JFrame{
 
     public static void main(String[] args) {
-        Pong p = new Pong(500,500);
+        Pong p = new Pong();
     }
     PongPanel pongPanel;
-    JFrame main;
 
-    Pong(int height,int width){
-        pongPanel = new PongPanel(new Position(0,40),new Position(1,0));
-        main = new JFrame("Pong");
-        main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        main.setSize(width,height);
-        main.add(pongPanel, BorderLayout.CENTER);
-        main.setVisible(true);
-        while(true){
-            pongPanel.start();
-        }
+    Pong(){
+        pongPanel = new PongPanel();
+        this.add(pongPanel);
+        this.setName("Pong");
+        this.setBackground(Color.BLACK);
+        this.setResizable(false);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.pack();
+        this.setVisible(true);
     }
 }
