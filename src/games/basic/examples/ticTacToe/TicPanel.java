@@ -84,6 +84,14 @@ public class TicPanel extends JPanel {
         return str.toString();
     }
 
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int height){
+        this.height = height;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;

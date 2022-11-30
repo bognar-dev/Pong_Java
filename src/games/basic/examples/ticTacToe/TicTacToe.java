@@ -7,47 +7,44 @@ import src.games.basic.position.Position;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 
 import static java.lang.System.exit;
 
 public class TicTacToe extends JFrame {
 
-
-    int WIDTH;
-    int HEIGHT;
-
-    int MARGIN;
+    int WIDTH, HEIGHT, MARGIN;
+    int aThirdHEIGHT = (int) (HEIGHT * 0.33);
+    int twoThirdHEIGHT = (int) (HEIGHT * 0.66);
+    int aThirdWIDTH = (int) (WIDTH * 0.33);
+    int twoThirdWIDTH = (int) (WIDTH * 0.66);
 
     TicPanel ticPanel;
     Button newGame, endGame;
 
     JPanel buttons;
-    JFrame main;
+    JFrame main, winnerScreen;
 
     Info[] occupiedPos;
     boolean crossTurn;
+    private JLabel winnerLabel;
 
 
     public static void main(String[] args) {
-        TicTacToe t = new TicTacToe(1000, 1000, 30, true);
+        TicTacToe t = new TicTacToe(600, 600, 30, false);
     }
 
     TicTacToe(int width, int height, int margin, boolean redStart) {
         this.occupiedPos = new Info[9];
-        for (int i = 0; i < occupiedPos.length; i++) {
-            occupiedPos[i] = new Info();
-        }
         this.crossTurn = redStart;
         this.WIDTH = width;
         this.HEIGHT = height;
         this.MARGIN = margin;
         createBoard();
         setButtons();
+        setUpWinnerScreen();
+        resetPostions();
         main = new JFrame("TicTacToe");
         main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         main.setSize(1980, 1020);
@@ -65,15 +62,122 @@ public class TicTacToe extends JFrame {
         objectList.add(new CrossGameObject(new Position((int) (HEIGHT * 0.66) + MARGIN, (int) (WIDTH * 0.33) + MARGIN), (int) (WIDTH * 0.30) - MARGIN, (int) (HEIGHT * 0.30) - MARGIN, Color.RED, true, 6));*/
         ticPanel = new TicPanel(objectList, 10, HEIGHT, WIDTH);
         ticPanel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        ticPanel.setSize(600,600);
         ticPanel.setFocusable(true);
         addListener();
     }
 
+    private void recalcSize() {
+        aThirdHEIGHT = (int) (HEIGHT * 0.33);
+        twoThirdHEIGHT = (int) (HEIGHT * 0.66);
+        aThirdWIDTH = (int) (WIDTH * 0.33);
+        twoThirdWIDTH = (int) (WIDTH * 0.66);
+    }
+
+    private void setUpWinnerScreen() {
+        winnerScreen = new JFrame("Winner");
+        Button continueButton = new Button("Continue");
+        continueButton.addActionListener(
+                e -> {
+                    winnerScreen.setVisible(false);
+                    winnerLabel.setVisible(false);
+                    winnerScreen.validate();
+                    winnerScreen.repaint();
+                    //TODO: remove all items from screen like jLabel
+                }
+        );
+        winnerScreen.setSize(400, 400);
+        winnerScreen.add(continueButton, BorderLayout.SOUTH);
+        winnerScreen.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+    }
+
     private void addListener() {
+        this.addComponentListener(
+                new ComponentListener() {
+                    @Override
+                    public void componentResized(ComponentEvent e) {
+                        HEIGHT = getHeight();
+                        WIDTH = getWidth();
+                        recalcSize();
+                        ticPanel.setWidth(WIDTH);
+                        ticPanel.setHeight(HEIGHT);
+                        validate();
+                        repaint();
+                    }
+
+                    @Override
+                    public void componentMoved(ComponentEvent e) {
+                    }
+
+                    @Override
+                    public void componentShown(ComponentEvent e) {
+                    }
+
+                    @Override
+                    public void componentHidden(ComponentEvent e) {
+                    }
+                }
+        );
         ticPanel.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                recalcSize();
                 System.out.println(e.getPoint());
+                if(e.getX() < aThirdWIDTH  && e.getY() < aThirdHEIGHT){
+                    System.out.println("Spot 1");
+                    Position pos = new Position(MARGIN, MARGIN);
+                    addObject(pos, 0);
+                }
+                if(e.getX() > aThirdWIDTH && e.getY() < aThirdHEIGHT+MARGIN
+                        && e.getX() < twoThirdWIDTH && e.getY() < aThirdHEIGHT){
+                    System.out.println("Spot 2");
+                    Position pos = new Position(aThirdHEIGHT + MARGIN, MARGIN);
+                    addObject(pos, 1);
+                }
+                if(e.getX() > twoThirdWIDTH && e.getY() < aThirdHEIGHT+MARGIN
+                        && e.getX() < WIDTH && e.getY() < aThirdHEIGHT){
+                    System.out.println("Spot 3");
+                    Position pos = new Position(twoThirdHEIGHT + MARGIN, MARGIN);
+                    addObject(pos, 2);
+                }
+                if(e.getX() < aThirdWIDTH  && e.getY() > aThirdHEIGHT
+                        && e.getY() < twoThirdHEIGHT){
+                    System.out.println("Spot 4");
+                    Position pos = new Position(MARGIN, aThirdWIDTH + MARGIN);
+                    addObject(pos, 3);
+                }
+                if(e.getX() > aThirdWIDTH  && e.getY() > aThirdHEIGHT
+                        && e.getY() < twoThirdHEIGHT && e.getX() < twoThirdWIDTH){
+                    System.out.println("Spot 5");
+                    Position pos = new Position(aThirdHEIGHT + MARGIN, aThirdWIDTH + MARGIN);
+                    addObject(pos, 4);
+                }
+                if(e.getX() > twoThirdWIDTH  && e.getY() > aThirdHEIGHT
+                        && e.getY() < twoThirdHEIGHT && e.getX() < WIDTH){
+                    System.out.println("Spot 6");
+                    Position pos = new Position(twoThirdHEIGHT + MARGIN, aThirdWIDTH + MARGIN);
+                    addObject(pos, 5);
+                }
+                if(e.getX() < aThirdWIDTH  && e.getY() > twoThirdWIDTH
+                        && e.getY() < HEIGHT){
+                    System.out.println("Spot 7");
+                    Position pos = new Position(MARGIN, twoThirdWIDTH + MARGIN);
+                    addObject(pos, 6);
+                }
+                if(e.getX() < twoThirdWIDTH  && e.getY() > twoThirdWIDTH
+                        && e.getY() < HEIGHT && e.getX() > aThirdWIDTH){
+                    System.out.println("Spot 8");
+                    Position pos = new Position(aThirdHEIGHT + MARGIN, twoThirdWIDTH + MARGIN);
+                    addObject(pos, 7);
+                }
+                if(e.getX() < WIDTH  && e.getY() > twoThirdWIDTH
+                        && e.getY() < HEIGHT && e.getX() > twoThirdWIDTH){
+                    System.out.println("Spot 9");
+                    Position pos = new Position(twoThirdHEIGHT + MARGIN, twoThirdWIDTH + MARGIN);
+                    addObject(pos, 8);
+                }
+
+
             }
 
             @Override
@@ -96,6 +200,7 @@ public class TicTacToe extends JFrame {
                 switch (input) {
                     case 'e' -> exit(0);
                     case 'n' -> {
+                        crossTurn = true;
                         ticPanel.removeAllItems();
                         ticPanel.validate();
                         ticPanel.repaint();
@@ -105,35 +210,35 @@ public class TicTacToe extends JFrame {
                         addObject(pos, 0);
                     }
                     case '2' -> {
-                        Position pos = new Position((int) (HEIGHT * 0.33) + MARGIN, MARGIN);
+                        Position pos = new Position(aThirdHEIGHT + MARGIN, MARGIN);
                         addObject(pos, 1);
                     }
                     case '3' -> {
-                        Position pos = new Position((int) (HEIGHT * 0.66) + MARGIN, MARGIN);
+                        Position pos = new Position(twoThirdHEIGHT + MARGIN, MARGIN);
                         addObject(pos, 2);
                     }
                     case '4' -> {
-                        Position pos = new Position(MARGIN, (int) (WIDTH * 0.33) + MARGIN);
+                        Position pos = new Position(MARGIN, aThirdWIDTH + MARGIN);
                         addObject(pos, 3);
                     }
                     case '5' -> {
-                        Position pos = new Position((int) (HEIGHT * 0.33) + MARGIN, (int) (WIDTH * 0.33) + MARGIN);
+                        Position pos = new Position(aThirdHEIGHT + MARGIN, aThirdWIDTH + MARGIN);
                         addObject(pos, 4);
                     }
                     case '6' -> {
-                        Position pos = new Position((int) (HEIGHT * 0.66) + MARGIN, (int) (WIDTH * 0.33) + MARGIN);
+                        Position pos = new Position(twoThirdHEIGHT + MARGIN, aThirdWIDTH + MARGIN);
                         addObject(pos, 5);
                     }
                     case '7' -> {
-                        Position pos = new Position(MARGIN, (int) (WIDTH * 0.66) + MARGIN);
+                        Position pos = new Position(MARGIN, twoThirdWIDTH + MARGIN);
                         addObject(pos, 6);
                     }
                     case '8' -> {
-                        Position pos = new Position((int) (HEIGHT * 0.33) + MARGIN, (int) (WIDTH * 0.66) + MARGIN);
+                        Position pos = new Position(aThirdHEIGHT + MARGIN, twoThirdWIDTH + MARGIN);
                         addObject(pos, 7);
                     }
                     case '9' -> {
-                        Position pos = new Position((int) (HEIGHT * 0.66) + MARGIN, (int) (WIDTH * 0.66) + MARGIN);
+                        Position pos = new Position(twoThirdHEIGHT + MARGIN, twoThirdWIDTH + MARGIN);
                         addObject(pos, 8);
                     }
                 }
@@ -188,18 +293,27 @@ public class TicTacToe extends JFrame {
     }
 
     private void winScreen() {
-        if(crossTurn) {
-           /* JFrame winnerPopUp = new JFrame("Winner");
-            winnerPopUp.setSize(400,400);
-            winnerPopUp.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-            winnerPopUp.add(new JLabel("The Winner is Cross"));
-            winnerPopUp.setVisible(true);*/
-            System.out.println("Cross Winner");
-        }else{
-            System.out.println("Circle Winner");
+        if (crossTurn) {
+            showWinscreen("The winner is Cross");
+        } else {
+            showWinscreen("The winner is Circle");
         }
+        winnerScreen.setVisible(true);
 
         System.out.println("Press N for new Game");
+        resetPostions();
+    }
+
+    private void showWinscreen(String text) {
+        winnerLabel = new JLabel(text, SwingConstants.CENTER);
+        winnerLabel.setSize(400, 400);
+        winnerLabel.setFont(new Font("Serif", Font.PLAIN, 30));
+        ;
+        winnerScreen.add(winnerLabel);
+        System.out.println(text);
+    }
+
+    private void resetPostions() {
         for (int i = 0; i < occupiedPos.length; i++) {
             occupiedPos[i] = new Info();
         }
