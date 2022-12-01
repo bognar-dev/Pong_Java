@@ -4,9 +4,13 @@ import src.games.basic.gameObjects.RectangularGameObject;
 import src.games.basic.position.Position;
 import src.games.basic.position.interfaces.Positionable;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
-public class Paddle extends AbstractMoveableGameObject{
+import static java.lang.Thread.sleep;
+
+public class Paddle extends AbstractMoveableGameObject implements Runnable{
 
     private int width;
     private int height;
@@ -20,13 +24,18 @@ public class Paddle extends AbstractMoveableGameObject{
 
     public Paddle(Positionable pos, int width, int height,Color colour, int strokeSize) {
         // Beachte: jetzt nicht this.pos setzen, sondern super.pos !
-        super(pos,new Position(0,0));		// Aufruf: AbstractGameObject(pos);
+        super(pos,new Position(0,20));		// Aufruf: AbstractGameObject(pos);
         this.score = 0;
         this.width  = width;
         this.height = height;
         this.colour = colour;
         this.strokeSize = strokeSize;
+        addListener();
     }
+
+    private void addListener() {
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
@@ -48,6 +57,10 @@ public class Paddle extends AbstractMoveableGameObject{
 
     public int getScore(){
         return score;
+    }
+
+    public void resetScore(){
+        this.score = 0;
     }
 
     @Override
@@ -79,7 +92,15 @@ public class Paddle extends AbstractMoveableGameObject{
     }
 
 
-    public void move(int upperBorder, int lowerBorder) {
+
+    @Override
+    public void run() {
+        try {
+            sleep(20);
+            move();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 }
