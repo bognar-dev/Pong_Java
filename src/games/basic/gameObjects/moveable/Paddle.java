@@ -95,9 +95,9 @@ public class Paddle extends AbstractMoveableGameObject implements Runnable{
 
     @Override
     public void run() {
+        move();
         try {
-            sleep(20);
-            move();
+            sleep(30);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

@@ -4,9 +4,10 @@ import src.games.basic.position.interfaces.Positionable;
 
 import java.awt.*;
 
+import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 
-public class Ball extends AbstractMoveableGameObject {
+public class Ball extends AbstractMoveableGameObject implements Runnable {
 
 
     private int radius;
@@ -67,6 +68,19 @@ public class Ball extends AbstractMoveableGameObject {
         int newX = this.getPos().getX() + this.getDeltaPos().getX();
         int newY = this.getPos().getY() + this.getDeltaPos().getY();
         this.setPos(newX, newY);
+    }
+
+    @Override
+    public void run() {
+        while(currentThread().isAlive()) {
+            try {
+                this.move();
+                sleep(30);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
 }
