@@ -1,8 +1,11 @@
 package src.games.basic.gameObjects.moveable;
 
+import src.games.basic.position.Position;
 import src.games.basic.position.interfaces.Positionable;
 
 import java.awt.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
@@ -16,12 +19,27 @@ public class Ball extends AbstractMoveableGameObject implements Runnable {
 
     private int strokeSize;
 
+    private Timer timer;
+
     public Ball(Positionable pos, Positionable deltaPos, int radius, Color colour, int strokeSize) {
         // Beachte: jetzt nicht this.pos setzen, sondern super.pos !
         super(pos, deltaPos);        // Aufruf: AbstractGameObject(pos);
         this.radius = radius;
         this.colour = colour;
         this.strokeSize = strokeSize;
+        setTimer();
+    }
+
+    private void setTimer() {
+        /*Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                setDeltaPos(new Position(getDeltaPos().getX()+10,getDeltaPos().getY()));
+
+            }
+        }, 3000);*/
     }
 
 

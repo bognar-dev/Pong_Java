@@ -14,11 +14,11 @@ import java.util.Random;
 import static java.lang.System.exit;
 import static java.lang.Thread.*;
 
-public class PongPanel extends JPanel implements Runnable{
+public class PongPanel extends JPanel implements Runnable {
 
     Dimension SCREEN_SIZE = new Dimension(1000, 600);
     Ball ball;
-    Thread ballThread,gameThread,paddleOneThread,paddleTwoThread;
+    Thread ballThread, gameThread, paddleOneThread, paddleTwoThread;
     Paddle p1, p2;
 
     int height, width;
@@ -38,6 +38,8 @@ public class PongPanel extends JPanel implements Runnable{
         paddleTwoThread = new Thread(p2);
         ballThread.start();
         gameThread.start();
+        paddleOneThread.start();
+        paddleTwoThread.start();
     }
 
     private void addHandler() {
@@ -45,7 +47,7 @@ public class PongPanel extends JPanel implements Runnable{
             @Override
             public void keyTyped(KeyEvent e) {
                 char input = e.getKeyChar();
-                System.out.println(input);
+                //System.out.println(input);
                 switch (input) {
                     case 'e' -> exit(0);
                     case 'n' -> {
@@ -61,31 +63,45 @@ public class PongPanel extends JPanel implements Runnable{
             @Override
             public void keyPressed(KeyEvent e) {
                 char input = e.getKeyChar();
-                System.out.println(input);
+                //System.out.println(input);
                 switch (input) {
                     case 'w' -> {
-                        p1.setDeltaPos(new Position(0, -20));
-                        p1.move();
+                        //System.out.println("w pressed");
+                        p1.setIsPressedUp(true);
                     }
                     case 's' -> {
-                        p1.setDeltaPos(new Position(0, 20));
-                        p1.move();
+                        p1.setIsPressedDown(true);
                     }
                     case 'u' -> {
-                        p2.setDeltaPos(new Position(0, -20));
-                        p2.move();
-
+                        p2.setIsPressedUp(true);
                     }
                     case 'j' -> {
-                        p2.setDeltaPos(new Position(0, 20));
-                        p2.move();
-
+                        p2.setIsPressedDown(true);
                     }
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
+                char input = e.getKeyChar();
+                //System.out.println(input);
+                switch (input) {
+                    case 'w' -> {
+                        //System.out.println("w released");
+                        p1.setIsPressedUp(false);
+                    }
+                    case 's' -> {
+                        p1.setIsPressedDown(false);
+                    }
+                    case 'u' -> {
+                        p2.setIsPressedUp(false);
+
+                    }
+                    case 'j' -> {
+                        p2.setIsPressedDown(false);
+
+                    }
+                }
 
             }
         });
@@ -145,7 +161,7 @@ public class PongPanel extends JPanel implements Runnable{
             throw new RuntimeException(e);
         }
         ball.setPos(new Position(500, 300));
-        ball.setDeltaPos(new Position(getPosivitveOrNegative(10),getPosivitveOrNegative(10)));
+        ball.setDeltaPos(new Position(getPosivitveOrNegative(10), getPosivitveOrNegative(10)));
     }
 
     private int getPosivitveOrNegative(int speed) {
@@ -164,8 +180,8 @@ public class PongPanel extends JPanel implements Runnable{
 
     @Override
     public void run() {
-        while(true) {
-            //System.out.println(ball.getPos());
+        while (gameThread.isAlive()) {
+            //System.out.println(p1.getPos());
             this.validate();
             this.repaint();
             ballHandle();
