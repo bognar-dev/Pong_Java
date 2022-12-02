@@ -6,18 +6,22 @@ import src.games.basic.position.Position;
 import javax.swing.*;
 import java.awt.*;
 
+import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 
 
-public class Pong extends JFrame{
+public class Pong extends JFrame implements Runnable{
 
     public static void main(String[] args) {
-        Pong p = new Pong();
+        Pong p = new Pong(10,30,30);
     }
     PongPanel pongPanel;
+    Thread pongThread;
+    boolean isFinished;
 
-    Pong(){
-        pongPanel = new PongPanel();
+    Pong(int ballSize,int ballSpeed,int paddleSize){
+        pongPanel = new PongPanel(ballSize,ballSpeed, paddleSize);
+        this.isFinished = false;
         this.add(pongPanel);
         this.setName("Pong");
         this.setBackground(Color.BLACK);
@@ -25,5 +29,22 @@ public class Pong extends JFrame{
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.pack();
         this.setVisible(true);
+        pongThread = new Thread(this);
+        pongThread.start();
+    }
+
+    @Override
+    public void run() {
+        while(!pongThread.isInterrupted()){
+            if(pongPanel.isFinished()){
+                pongThread.interrupt();
+                this.setVisible(false);
+                isFinished = true;
+            }
+        }
+    }
+
+    public boolean isFinished(){
+        return isFinished;
     }
 }

@@ -124,9 +124,8 @@ public class Paddle extends AbstractMoveableGameObject implements Runnable {
                 setDeltaPos(new Position(0, 0));
             }
             try {
-                sleep(30);
+                sleep(20);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             }
         }
     }

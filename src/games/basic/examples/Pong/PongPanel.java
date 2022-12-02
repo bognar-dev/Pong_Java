@@ -1,5 +1,6 @@
 package src.games.basic.examples.Pong;
 
+import src.games.basic.gameObjects.ScoreGameObject;
 import src.games.basic.gameObjects.moveable.Ball;
 import src.games.basic.gameObjects.moveable.Paddle;
 import src.games.basic.position.Position;
@@ -18,28 +19,38 @@ public class PongPanel extends JPanel implements Runnable {
 
     Dimension SCREEN_SIZE = new Dimension(1000, 600);
     Ball ball;
-    Thread ballThread, gameThread, paddleOneThread, paddleTwoThread;
+    ScoreGameObject p1Score, p2Score;
+    Thread ballThread, gameThread, paddleOneThread, paddleTwoThread, p1ScoreThread, p2ScoreThread;
     Paddle p1, p2;
 
-    int height, width;
-    private double scoreLimit;
+    int ballSpeed;
+    private boolean isFinished;
 
-    PongPanel() {
-        newBall(new Position(500, 300), new Position(-10, 10));
-        newPaddles();
+    PongPanel(int ballSize, int ballSpeed, int paddleSize) {
+        this.ballSpeed = ballSpeed;
+        newBall(new Position(500, 300), new Position(getPosivitveOrNegative(ballSpeed), 10), ballSize);
+        p1Score = new ScoreGameObject(new Position(250, 80), Color.WHITE, 10, 60);
+        p2Score = new ScoreGameObject(new Position(725, 80), Color.WHITE, 10, 60);
+        newPaddles(paddleSize);
         addHandler();
-        this.setBackground(Color.BLACK);
+        this.setBackground(Color.GRAY);
         this.setFocusable(true);
         this.setPreferredSize(SCREEN_SIZE);
-        scoreLimit = 10;
+    }
+
+    private void startThreads() {
         gameThread = new Thread(this);
         ballThread = new Thread(ball);
         paddleOneThread = new Thread(p1);
         paddleTwoThread = new Thread(p2);
+        p1ScoreThread = new Thread(p1Score);
+        p2ScoreThread = new Thread(p2Score);
         ballThread.start();
         gameThread.start();
         paddleOneThread.start();
         paddleTwoThread.start();
+        p1ScoreThread.start();
+        p2ScoreThread.start();
     }
 
     private void addHandler() {
@@ -52,9 +63,10 @@ public class PongPanel extends JPanel implements Runnable {
                     case 'e' -> exit(0);
                     case 'n' -> {
                         restartBall();
-
-
+                        p1Score.resetScore();
+                        p2Score.resetScore();
                     }
+                    case ' ' -> startThreads();
 
                 }
             }
@@ -107,44 +119,48 @@ public class PongPanel extends JPanel implements Runnable {
         });
     }
 
-    private void newBall(Positionable pos, Positionable speed) {
-        ball = new Ball(pos, speed, 50, Color.WHITE, 6);
+    private void newBall(Positionable pos, Positionable speed, int ballSize) {
+        ball = new Ball(pos, speed, ballSize, Color.WHITE, 1);
     }
 
-    private void newPaddles() {
-        p1 = new Paddle(new Position(50, 30), 5, 100, Color.WHITE, 8);
-        p2 = new Paddle(new Position(SCREEN_SIZE.width - 50, 30), 5, 100, Color.WHITE, 8);
+    private void newPaddles(int paddleSize) {
+        p1 = new Paddle(new Position(50, 30), 1, paddleSize, Color.WHITE, 10);
+        p2 = new Paddle(new Position(SCREEN_SIZE.width - 50, 30), 1, paddleSize, Color.WHITE, 10);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         super.paintComponent(g2);
-        g2.setStroke(new BasicStroke(8));
+        g2.setStroke(new BasicStroke(4));
+        g2.drawLine(500, 0, 500, SCREEN_SIZE.height);
+        ball.paintComponent(g2);
         p1.paintComponent(g2);
         p2.paintComponent(g2);
-        ball.paintComponent(g2);
+        p1Score.paintComponent(g2);
+        p2Score.paintComponent(g2);
+        Toolkit.getDefaultToolkit().sync();
     }
 
 
     private void ballHandle() {
         if (isTouchingTop()) {
-            this.ball.setPos(ball.getPos().getX(),1);
+            this.ball.setPos(ball.getPos().getX(), 1);
             this.ball.reverseYDirection();
         }
         if (isTouchingBottom()) {
-            this.ball.setPos(ball.getPos().getX(),SCREEN_SIZE.height -this.ball.getHeight());
+            this.ball.setPos(ball.getPos().getX(), SCREEN_SIZE.height - this.ball.getHeight());
             this.ball.reverseYDirection();
         }
         if (ball.isRightOf(p2)) {
-            p1.increaseScore();
+            p1Score.increaseScore();
             restartBall();
-            System.out.println("Player 1: " + p1.getScore() + " Player 2: " + p2.getScore());
+            System.out.println("Player 1: " + p1Score.getScore() + " Player 2: " + p2Score.getScore());
         }
         if (ball.isLeftOf(p1)) {
-            p2.increaseScore();
+            p2Score.increaseScore();
             restartBall();
-            System.out.println("Player 1: " + p1.getScore() + " Player 2: " + p2.getScore());
+            System.out.println("Player 1: " + p1Score.getScore() + " Player 2: " + p2Score.getScore());
         }
         if (ball.touches(p1) || ball.touches(p2)) {
             ball.reverseXDirection();
@@ -166,7 +182,7 @@ public class PongPanel extends JPanel implements Runnable {
             throw new RuntimeException(e);
         }
         ball.setPos(new Position(500, 300));
-        ball.setDeltaPos(new Position(getPosivitveOrNegative(10), getPosivitveOrNegative(10)));
+        ball.setDeltaPos(new Position(getPosivitveOrNegative(ballSpeed), getPosivitveOrNegative(new Random().nextInt(10, 20))));
     }
 
     private int getPosivitveOrNegative(int speed) {
@@ -178,25 +194,54 @@ public class PongPanel extends JPanel implements Runnable {
         }
     }
 
+    public boolean isFinished() {
+        return isFinished;
+    }
+
 
     private boolean isTouchingTop() {
-        return this.ball.getPos().getY() < 0 ;
+        return this.ball.getPos().getY() < 0;
     }
+
     private boolean isTouchingBottom() {
         return this.ball.getPos().getY() + this.ball.getHeight() > SCREEN_SIZE.height;
     }
+
     @Override
     public void run() {
-        while (gameThread.isAlive()) {
+        while (!gameThread.isInterrupted()) {
             //System.out.println(p1.getPos());
             this.validate();
             this.repaint();
             ballHandle();
+            if (p2Score.reachedLimit()) {
+                System.out.println("Player 2 Wins");
+                interruptAllThreads();
+                isFinished = true;
+            }
+            if (p1Score.reachedLimit()) {
+                System.out.println("Player 1 Wins");
+                interruptAllThreads();
+                isFinished = true;
+            }
             try {
-                sleep(30);
+                sleep(20);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                isFinished = true;
+                interruptAllThreads();
+
             }
         }
+    }
+
+    private void interruptAllThreads() {
+        gameThread.interrupt();
+        ballThread.interrupt();
+        gameThread.interrupt();
+        paddleOneThread.interrupt();
+        paddleTwoThread.interrupt();
+        p1ScoreThread.interrupt();
+        p2ScoreThread.interrupt();
+        exit(0);
     }
 }
