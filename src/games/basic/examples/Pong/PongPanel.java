@@ -128,7 +128,12 @@ public class PongPanel extends JPanel implements Runnable {
 
 
     private void ballHandle() {
-        if (isTouchingTopOrBottom()) {
+        if (isTouchingTop()) {
+            this.ball.setPos(ball.getPos().getX(),1);
+            this.ball.reverseYDirection();
+        }
+        if (isTouchingBottom()) {
+            this.ball.setPos(ball.getPos().getX(),SCREEN_SIZE.height -this.ball.getHeight());
             this.ball.reverseYDirection();
         }
         if (ball.isRightOf(p2)) {
@@ -174,10 +179,12 @@ public class PongPanel extends JPanel implements Runnable {
     }
 
 
-    private boolean isTouchingTopOrBottom() {
-        return this.ball.getPos().getY() <= 0 || this.ball.getPos().getY() + this.ball.getHeight() >= SCREEN_SIZE.height;
+    private boolean isTouchingTop() {
+        return this.ball.getPos().getY() < 0 ;
     }
-
+    private boolean isTouchingBottom() {
+        return this.ball.getPos().getY() + this.ball.getHeight() > SCREEN_SIZE.height;
+    }
     @Override
     public void run() {
         while (gameThread.isAlive()) {
