@@ -1,16 +1,21 @@
 package src.games.basic.examples.Pong;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import static java.lang.Thread.sleep;
 
 public class PongMenu extends JFrame implements Runnable {
+
+    private String[] colourArr = {"Dark green", "Pink", "White", "Black", "Gray","Blue","Cyan","Yellow","Magenta","Orange","Red"};
+
     public static void main(String[] args) {
         PongMenu pM = new PongMenu(new Dimension(1600, 1000));
     }
+
 
     private int ballSize = 20;
     private int paddleSize = 100;
@@ -18,14 +23,21 @@ public class PongMenu extends JFrame implements Runnable {
 
     private int gameLimit = 10;
 
-    private boolean startPong;
+    private Color DARKGREEN = new Color(0, 255, 100, 77);
+    private Color BLUE = new Color(0, 166, 255, 77);
+
+    private JList p2ColourList, p1ColourList, backgroundColourList, ballColourList;
+    private Color p1Colour, p2Colour, ballColour, backgroundColour;
     Pong pong;
+
+    boolean startPong;
     Dimension windowSize;
     Button playButton;
     JPanel buttonPanel, sliderPanel, labelPanel, colourPanel;
-    JLabel ballSizeLabel, paddleSizeLabel, ballSpeedLabel,gameLimitLabel;
+    JLabel ballSizeLabel, paddleSizeLabel, ballSpeedLabel, gameLimitLabel;
     Thread mainThread, pongThread;
-    JSlider ballSizeSlider, paddleSizeSlider, ballSpeedSlider,gameLimitSlider;
+
+    JSlider ballSizeSlider, paddleSizeSlider, ballSpeedSlider, gameLimitSlider;
 
 
     public PongMenu(Dimension windowSize) {
@@ -35,8 +47,42 @@ public class PongMenu extends JFrame implements Runnable {
         setButtons();
         setSliders();
         //setColourMenu();
+        setJLists();
         setLabels();
         setThreads();
+    }
+
+
+    public static void changeFont ( Component component, Font font )
+    {
+        component.setFont ( font );
+        if ( component instanceof Container )
+        {
+            for ( Component child : ( ( Container ) component ).getComponents () )
+            {
+                changeFont ( child, font );
+            }
+        }
+    }
+
+    private void setJLists() {
+        colourPanel = new JPanel();
+        colourPanel.setLayout(new GridLayout(2,2));
+        colourPanel.setPreferredSize(new Dimension(400, 600));
+        p1ColourList = new JList(colourArr);
+        p2ColourList = new JList(colourArr);
+        //p1ColourList.setLayout(new FlowLayout());
+        backgroundColourList = new JList(colourArr);
+        ballColourList = new JList(colourArr);
+        colourPanel.add(new JLabel("Player 1 colour: "));
+        colourPanel.add(p1ColourList);
+        colourPanel.add(new JLabel("Player 2 colour: "));
+        colourPanel.add(p2ColourList);
+        colourPanel.add(new JLabel("Ball colour: "));
+        colourPanel.add(ballColourList);
+        colourPanel.add(new JLabel("Background colour: "));
+        colourPanel.add(backgroundColourList);
+        this.add(colourPanel, BorderLayout.EAST);
     }
 
 
@@ -61,11 +107,19 @@ public class PongMenu extends JFrame implements Runnable {
         ballSizeLabel = new JLabel("Ball size: " + ballSize);
         ballSpeedLabel = new JLabel("Ball speed: " + ballSpeed);
         paddleSizeLabel = new JLabel("Paddle size: " + paddleSize);
-        gameLimitLabel = new JLabel("Game limit: "+ gameLimit);
+        gameLimitLabel = new JLabel("Game limit: " + gameLimit);
+        labelPanel.setLayout(new GridLayout(4,1));
+        //labelPanel.setPreferredSize(new Dimension(200, 600));
+
         labelPanel.add(paddleSizeLabel);
+
         labelPanel.add(ballSizeLabel);
+
         labelPanel.add(ballSpeedLabel);
+
         labelPanel.add(gameLimitLabel);
+        changeFont(labelPanel,new Font("Wide Latin",0,30));
+
         this.add(labelPanel, BorderLayout.CENTER);
         this.pack();
     }
@@ -81,7 +135,7 @@ public class PongMenu extends JFrame implements Runnable {
         playButton = new Button("Play");
         playButton.addActionListener(
                 e -> {
-                    pong = new Pong(ballSize, ballSpeed, paddleSize, gameLimit);
+                    pong = new Pong(ballSize, ballSpeed, paddleSize, gameLimit, p1Colour, p2Colour, ballColour, backgroundColour);
                     this.setVisible(false);
                 });
         buttonPanel.add(playButton);
@@ -167,12 +221,72 @@ public class PongMenu extends JFrame implements Runnable {
             ballSizeLabel.setText("Ballsize: " + ballSize);
             paddleSizeLabel.setText("Paddlesize: " + paddleSize);
             ballSpeedLabel.setText("Ball speed: " + ballSpeed);
-            gameLimitLabel.setText("Game limit: "+ gameLimit);
+            gameLimitLabel.setText("Game limit: " + gameLimit);
+            getThemeColours();
             try {
                 sleep(30);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private void getThemeColours() {
+        p1Colour = getColor((String) p1ColourList.getSelectedValue());
+        p2Colour = getColor((String) p2ColourList.getSelectedValue());
+        ballColour = getColor((String) ballColourList.getSelectedValue());
+        backgroundColour = getColor((String) backgroundColourList.getSelectedValue());
+    }
+
+    Color getColor(String col) {
+        if (col == null) {
+            return Color.BLACK;
+        }
+        Color color;
+        switch (col.toLowerCase()) {
+            case "black":
+                color = Color.BLACK;
+                break;
+            case "blue":
+                color = BLUE;
+                break;
+            case "cyan":
+                color = Color.CYAN;
+                break;
+            case "darkgray":
+                color = Color.DARK_GRAY;
+                break;
+            case "gray":
+                color = Color.GRAY;
+                break;
+            case "dark green":
+                color = DARKGREEN;
+                break;
+
+            case "yellow":
+                color = Color.YELLOW;
+                break;
+            case "lightgray":
+                color = Color.LIGHT_GRAY;
+                break;
+            case "magenta":
+                color = Color.MAGENTA;
+                break;
+            case "orange":
+                color = Color.ORANGE;
+                break;
+            case "pink":
+                color = Color.PINK;
+                break;
+            case "red":
+                color = new Color(136, 2, 2);
+                break;
+            case "white":
+                color = Color.WHITE;
+                break;
+            default:
+                color = Color.BLACK;
+        }
+        return color;
     }
 }

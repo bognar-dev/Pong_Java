@@ -25,15 +25,20 @@ public class PongPanel extends JPanel implements Runnable {
 
     int ballSpeed;
     private boolean isFinished;
+    Color p1Colour,p2Colour,ballColour,backgroundColour;
 
-    PongPanel(int ballSize, int ballSpeed, int paddleSize,int gameLimit) {
+    PongPanel(int ballSize, int ballSpeed, int paddleSize,int gameLimit,Color p1Colour,Color p2Colour,Color ballColour,Color backgroundColour) {
         this.ballSpeed = ballSpeed;
+        this.p1Colour = p1Colour;
+        this.p2Colour = p2Colour;
+        this.backgroundColour = backgroundColour;
+        this.ballColour = ballColour;
         newBall(new Position(500, 300), new Position(getPosivitveOrNegative(ballSpeed), 10), ballSize);
-        p1Score = new ScoreGameObject(new Position(250, 80), Color.WHITE, gameLimit, 60);
-        p2Score = new ScoreGameObject(new Position(725, 80), Color.WHITE, gameLimit, 60);
+        p1Score = new ScoreGameObject(new Position(250, 80), p1Colour, gameLimit, 60);
+        p2Score = new ScoreGameObject(new Position(725, 80), p2Colour, gameLimit, 60);
         newPaddles(paddleSize);
         addHandler();
-        this.setBackground(Color.GRAY);
+        this.setBackground(backgroundColour);
         this.setFocusable(true);
         this.setPreferredSize(SCREEN_SIZE);
     }
@@ -120,12 +125,12 @@ public class PongPanel extends JPanel implements Runnable {
     }
 
     private void newBall(Positionable pos, Positionable speed, int ballSize) {
-        ball = new Ball(pos, speed, ballSize, Color.WHITE, 1);
+        ball = new Ball(pos, speed, ballSize, ballColour, 1);
     }
 
     private void newPaddles(int paddleSize) {
-        p1 = new Paddle(new Position(50, 30), 1, paddleSize, Color.WHITE, 10);
-        p2 = new Paddle(new Position(SCREEN_SIZE.width - 50, 30), 1, paddleSize, Color.WHITE, 10);
+        p1 = new Paddle(new Position(50, 30), 1, paddleSize, p1Colour, 10);
+        p2 = new Paddle(new Position(SCREEN_SIZE.width - 50, 30), 1, paddleSize, p2Colour, 10);
     }
 
     @Override

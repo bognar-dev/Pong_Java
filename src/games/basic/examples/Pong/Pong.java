@@ -13,14 +13,14 @@ import static java.lang.Thread.sleep;
 public class Pong extends JFrame implements Runnable{
 
     public static void main(String[] args) {
-        Pong p = new Pong(10,30,30,10);
+        Pong p = new Pong(10,30,30,10,Color.BLACK,Color.BLACK,Color.GRAY,Color.WHITE);
     }
     PongPanel pongPanel;
     Thread pongThread;
     boolean isFinished;
 
-    Pong(int ballSize,int ballSpeed,int paddleSize,int gameLimit){
-        pongPanel = new PongPanel(ballSize,ballSpeed, paddleSize,gameLimit);
+    Pong(int ballSize,int ballSpeed,int paddleSize,int gameLimit,Color p1Colour,Color p2Colour, Color ballColour,Color backgroundColour){
+        pongPanel = new PongPanel(ballSize,ballSpeed, paddleSize,gameLimit,p1Colour,p2Colour,ballColour,backgroundColour);
         this.isFinished = false;
         this.add(pongPanel);
         this.setName("Pong");
