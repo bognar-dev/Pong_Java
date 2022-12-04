@@ -26,11 +26,11 @@ public class PongPanel extends JPanel implements Runnable {
     int ballSpeed;
     private boolean isFinished;
 
-    PongPanel(int ballSize, int ballSpeed, int paddleSize) {
+    PongPanel(int ballSize, int ballSpeed, int paddleSize,int gameLimit) {
         this.ballSpeed = ballSpeed;
         newBall(new Position(500, 300), new Position(getPosivitveOrNegative(ballSpeed), 10), ballSize);
-        p1Score = new ScoreGameObject(new Position(250, 80), Color.WHITE, 10, 60);
-        p2Score = new ScoreGameObject(new Position(725, 80), Color.WHITE, 10, 60);
+        p1Score = new ScoreGameObject(new Position(250, 80), Color.WHITE, gameLimit, 60);
+        p2Score = new ScoreGameObject(new Position(725, 80), Color.WHITE, gameLimit, 60);
         newPaddles(paddleSize);
         addHandler();
         this.setBackground(Color.GRAY);
@@ -215,11 +215,13 @@ public class PongPanel extends JPanel implements Runnable {
             this.repaint();
             ballHandle();
             if (p2Score.reachedLimit()) {
+                new PopupMenu("Player 2 wins").setEnabled(true);
                 System.out.println("Player 2 Wins");
                 interruptAllThreads();
                 isFinished = true;
             }
             if (p1Score.reachedLimit()) {
+                new PopupMenu("Player 1 wins").setEnabled(true);
                 System.out.println("Player 1 Wins");
                 interruptAllThreads();
                 isFinished = true;
