@@ -1,5 +1,7 @@
 package src.games.basic.examples.Pong;
 
+import src.games.basic.SoundEffect;
+import src.games.basic.StopWatch;
 import src.games.basic.gameObjects.ScoreGameObject;
 import src.games.basic.gameObjects.moveable.Ball;
 import src.games.basic.gameObjects.moveable.Paddle;
@@ -15,6 +17,7 @@ import java.util.Random;
 import static java.lang.System.exit;
 import static java.lang.Thread.*;
 
+
 public class PongPanel extends JPanel implements Runnable {
 
     Dimension SCREEN_SIZE = new Dimension(1000, 600);
@@ -24,24 +27,38 @@ public class PongPanel extends JPanel implements Runnable {
     Paddle p1, p2;
 
     int ballSpeed;
-    private boolean isFinished;
-    Color p1Colour,p2Colour,ballColour,backgroundColour;
+    private boolean isFinished, sound;
+    Color p1Colour, p2Colour, ballColour, backgroundColour;
+    StopWatch stopWatch;
+    private Thread pongThread,pingThread;
+    private SoundEffect pongSound, pingSound;
+    private Thread stopWatchThread;
 
-    PongPanel(int ballSize, int ballSpeed, int paddleSize,int gameLimit,Color p1Colour,Color p2Colour,Color ballColour,Color backgroundColour) {
+    PongPanel(int ballSize, int ballSpeed, int paddleSize, int gameLimit, Color p1Colour, Color p2Colour, Color ballColour, Color backgroundColour, boolean sound) {
         this.ballSpeed = ballSpeed;
         this.p1Colour = p1Colour;
         this.p2Colour = p2Colour;
         this.backgroundColour = backgroundColour;
         this.ballColour = ballColour;
+        this.sound = sound;
+        this.stopWatch = new StopWatch();
         newBall(new Position(500, 300), new Position(getPosivitveOrNegative(ballSpeed), 10), ballSize);
         p1Score = new ScoreGameObject(new Position(250, 80), p1Colour, gameLimit, 60);
         p2Score = new ScoreGameObject(new Position(725, 80), p2Colour, gameLimit, 60);
         newPaddles(paddleSize);
         addHandler();
+        setSounds();
         this.setBackground(backgroundColour);
         this.setFocusable(true);
         this.setPreferredSize(SCREEN_SIZE);
     }
+
+    private void setSounds() {
+        // Open an audio input stream.
+        pongSound = new SoundEffect("./sounds/pongSounds/converted_ping.wav");
+        pingSound = new SoundEffect("./sounds/pongSounds/converted_pong.wav");
+    }
+
 
     private void startThreads() {
         gameThread = new Thread(this);
@@ -50,6 +67,12 @@ public class PongPanel extends JPanel implements Runnable {
         paddleTwoThread = new Thread(p2);
         p1ScoreThread = new Thread(p1Score);
         p2ScoreThread = new Thread(p2Score);
+        pingThread = new Thread(pingSound);
+        pongThread = new Thread(pongSound);
+        stopWatchThread = new Thread(stopWatch);
+        stopWatchThread.start();
+        pingThread.start();
+        pongThread.start();
         ballThread.start();
         gameThread.start();
         paddleOneThread.start();
@@ -129,8 +152,8 @@ public class PongPanel extends JPanel implements Runnable {
     }
 
     private void newPaddles(int paddleSize) {
-        p1 = new Paddle(new Position(50, 30), 1, paddleSize, p1Colour, 10);
-        p2 = new Paddle(new Position(SCREEN_SIZE.width - 50, 30), 1, paddleSize, p2Colour, 10);
+        p1 = new Paddle(new Position(50, 30), 10, paddleSize, p1Colour, 10);
+        p2 = new Paddle(new Position(SCREEN_SIZE.width - 50, 30), 10, paddleSize, p2Colour, 10);
     }
 
     @Override
@@ -148,7 +171,7 @@ public class PongPanel extends JPanel implements Runnable {
     }
 
 
-    private void ballHandle() {
+    void ballHandle() {
         if (isTouchingTop()) {
             this.ball.setPos(ball.getPos().getX(), 1);
             this.ball.reverseYDirection();
@@ -167,9 +190,32 @@ public class PongPanel extends JPanel implements Runnable {
             restartBall();
             System.out.println("Player 1: " + p1Score.getScore() + " Player 2: " + p2Score.getScore());
         }
-        if (ball.touches(p1) || ball.touches(p2)) {
+        if (ball.touches(p1)) {
+            if (sound) {
+                pingSound.makeSound();
+            }
             ball.reverseXDirection();
         }
+        if (ball.touches(p2)) {
+            if (sound) {
+                pongSound.makeSound();
+            }
+            ball.reverseXDirection();
+        }
+        if(stopWatch.getElapsedTime() > 3000){
+            stopWatch.reset();
+            increaseBallSpeed();
+        }
+    }
+
+    private void increaseBallSpeed() {
+        Positionable ballSpeed = ball.getDeltaPos();
+        if(ballSpeed.getX() > 0){
+            ballSpeed.setX(ballSpeed.getX() +1);
+        }else {
+            ballSpeed.setX(ballSpeed.getX() -1);
+        }
+        ball.setDeltaPos(ballSpeed);
     }
 
     private boolean isTouchingRight() {
@@ -187,10 +233,10 @@ public class PongPanel extends JPanel implements Runnable {
             throw new RuntimeException(e);
         }
         ball.setPos(new Position(500, 300));
-        ball.setDeltaPos(new Position(getPosivitveOrNegative(ballSpeed), getPosivitveOrNegative(new Random().nextInt(10, 20))));
+        ball.setDeltaPos(new Position(getPosivitveOrNegative(ballSpeed), getPosivitveOrNegative(ballSpeed)));
     }
 
-    private int getPosivitveOrNegative(int speed) {
+    protected int getPosivitveOrNegative(int speed) {
         Random b = new Random();
         if (b.nextBoolean()) {
             return speed;

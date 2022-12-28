@@ -1,5 +1,7 @@
 package src.games.basic.examples.Pong;
 
+import org.w3c.dom.Text;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
@@ -10,7 +12,7 @@ import static java.lang.Thread.sleep;
 
 public class PongMenu extends JFrame implements Runnable {
 
-    private String[] colourArr = {"Dark green", "Pink", "White", "Black", "Gray","Blue","Cyan","Yellow","Magenta","Orange","Red"};
+    private String[] colourArr = {"Dark green", "Pink", "White", "Black", "Gray", "Blue", "Cyan", "Yellow", "Magenta", "Orange", "Red"};
 
     public static void main(String[] args) {
         PongMenu pM = new PongMenu(new Dimension(1600, 1000));
@@ -19,7 +21,7 @@ public class PongMenu extends JFrame implements Runnable {
 
     private int ballSize = 20;
     private int paddleSize = 100;
-    private int ballSpeed = 20;
+    private int ballSpeed = 10;
 
     private int gameLimit = 10;
 
@@ -27,6 +29,8 @@ public class PongMenu extends JFrame implements Runnable {
     private Color BLUE = new Color(0, 166, 255, 77);
 
     private JList p2ColourList, p1ColourList, backgroundColourList, ballColourList;
+
+    private JCheckBox soundCheckBox;
     private Color p1Colour, p2Colour, ballColour, backgroundColour;
     Pong pong;
 
@@ -46,28 +50,30 @@ public class PongMenu extends JFrame implements Runnable {
         setFrameSettings();
         setButtons();
         setSliders();
-        //setColourMenu();
         setJLists();
         setLabels();
+        setCheckBoxes();
         setThreads();
     }
 
+    private void setCheckBoxes() {
+        soundCheckBox = new JCheckBox("Develop: Mute",false);
+        labelPanel.add(soundCheckBox);
+    }
 
-    public static void changeFont ( Component component, Font font )
-    {
-        component.setFont ( font );
-        if ( component instanceof Container )
-        {
-            for ( Component child : ( ( Container ) component ).getComponents () )
-            {
-                changeFont ( child, font );
+
+    public static void changeFont(Component component, Font font) {
+        component.setFont(font);
+        if (component instanceof Container) {
+            for (Component child : ((Container) component).getComponents()) {
+                changeFont(child, font);
             }
         }
     }
 
     private void setJLists() {
         colourPanel = new JPanel();
-        colourPanel.setLayout(new GridLayout(2,2));
+        colourPanel.setLayout(new GridLayout(2, 2));
         colourPanel.setPreferredSize(new Dimension(400, 600));
         p1ColourList = new JList(colourArr);
         p2ColourList = new JList(colourArr);
@@ -108,7 +114,7 @@ public class PongMenu extends JFrame implements Runnable {
         ballSpeedLabel = new JLabel("Ball speed: " + ballSpeed);
         paddleSizeLabel = new JLabel("Paddle size: " + paddleSize);
         gameLimitLabel = new JLabel("Game limit: " + gameLimit);
-        labelPanel.setLayout(new GridLayout(4,1));
+        labelPanel.setLayout(new GridLayout(4, 1));
         //labelPanel.setPreferredSize(new Dimension(200, 600));
 
         labelPanel.add(paddleSizeLabel);
@@ -118,7 +124,7 @@ public class PongMenu extends JFrame implements Runnable {
         labelPanel.add(ballSpeedLabel);
 
         labelPanel.add(gameLimitLabel);
-        changeFont(labelPanel,new Font("Wide Latin",0,30));
+        changeFont(labelPanel, new Font("Wide Latin", 0, 30));
 
         this.add(labelPanel, BorderLayout.CENTER);
         this.pack();
@@ -135,11 +141,31 @@ public class PongMenu extends JFrame implements Runnable {
         playButton = new Button("Play");
         playButton.addActionListener(
                 e -> {
-                    pong = new Pong(ballSize, ballSpeed, paddleSize, gameLimit, p1Colour, p2Colour, ballColour, backgroundColour);
-                    this.setVisible(false);
+                    startGame();
                 });
         buttonPanel.add(playButton);
         this.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void startGame() {
+        checkColoursSelected();
+        pong = new Pong(ballSize, ballSpeed, paddleSize, gameLimit, p1Colour, p2Colour, ballColour, backgroundColour,!soundCheckBox.isSelected(),false);
+        this.setVisible(false);
+    }
+
+    private void checkColoursSelected() {
+        if(p1Colour == Color.BLACK){
+            p1Colour = DARKGREEN;
+        }
+        if(p2Colour == Color.BLACK){
+            p2Colour = DARKGREEN;
+        }
+        if(backgroundColour == Color.BLACK){
+            backgroundColour = Color.white;
+        }
+        if (ballColour == Color.BLACK){
+            ballColour = Color.BLACK;
+        }
     }
 
     private void setFrameSettings() {
@@ -180,7 +206,7 @@ public class PongMenu extends JFrame implements Runnable {
         ballSpeedSlider = new JSlider();
         ballSpeedSlider.setMinimum(5);
         ballSpeedSlider.setMaximum(30);
-        ballSpeedSlider.setValue(20);
+        ballSpeedSlider.setValue(10);
         ballSpeedSlider.setBorder(
                 BorderFactory.createEmptyBorder(0, 0, 10, 0));
         ballSpeedSlider.setFont(new Font("Serif", Font.ITALIC, 15));

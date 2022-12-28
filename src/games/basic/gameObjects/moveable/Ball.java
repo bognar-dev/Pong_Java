@@ -90,11 +90,12 @@ public class Ball extends AbstractMoveableGameObject implements Runnable {
 
     @Override
     public void run() {
-        while(currentThread().isAlive()) {
+        while (currentThread().isAlive()) {
             this.move();
             try {
                 sleep(20);
             } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 

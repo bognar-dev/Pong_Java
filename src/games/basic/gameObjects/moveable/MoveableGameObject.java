@@ -60,6 +60,5 @@ public class MoveableGameObject extends AbstractMoveableGameObject {
 
 	@Override
 	public void paintComponent(Graphics g) {
-
 	}
 }
